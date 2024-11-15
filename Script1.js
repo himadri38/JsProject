@@ -5,18 +5,21 @@ const locationButton = document.querySelector(".location-btn");
 const currentWeatherContainer = document.querySelector(".current-weather .details");
 const forecastContainer = document.querySelector(".weather-cards");
 
-const fetchWeatherData = (lat, lon) => {
-    const CURRENT_WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
-    fetch(CURRENT_WEATHER_URL)
-        .then((response) => response.json())
-        .then((data) => displayCurrentWeather(data))
-        .catch(() => alert("Error fetching current weather data!"));
+const fetchWeatherData = async (lat, lon) => {
+    try {
+        const CURRENT_WEATHER_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+        const responseCurrent = await fetch(CURRENT_WEATHER_URL);
+        const dataCurrent = await responseCurrent.json();
+        displayCurrentWeather(dataCurrent);
 
-    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&cnt=5&appid=${API_KEY}&units=metric`;
-    fetch(FORECAST_URL)
-        .then((response) => response.json())
-        .then((data) => displayForecast(data))
-        .catch(() => alert("Error fetching weather forecast!"));
+        const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+        const responseForecast = await fetch(FORECAST_URL);
+        const dataForecast = await responseForecast.json();
+        displayForecast(dataForecast);
+    } catch (error) {
+        alert("Error fetching weather data!");
+        console.error(error);
+    }
 };
 
 const displayCurrentWeather = (data) => {
@@ -37,7 +40,9 @@ const displayCurrentWeather = (data) => {
 
 const displayForecast = (data) => {
     forecastContainer.innerHTML = "";
-    data.list.forEach((item) => {
+    const forecasts = data.list.filter((_, index) => index % 8 === 0).slice(0, 5);
+    
+    forecasts.forEach((item) => {
         const date = new Date(item.dt * 1000).toLocaleDateString();
         const forecastItem = document.createElement("li");
         forecastItem.classList.add("card");
@@ -52,19 +57,21 @@ const displayForecast = (data) => {
     });
 };
 
-const fetchCoordinates = (cityName) => {
-    const GEO_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
-    fetch(GEO_API_URL)
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.length > 0) {
-                const { lat, lon } = data[0];
-                fetchWeatherData(lat, lon);
-            } else {
-                alert("City not found. Please enter a valid city name.");
-            }
-        })
-        .catch(() => alert("Error fetching coordinates for the city!"));
+const fetchCoordinates = async (cityName) => {
+    try {
+        const GEO_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
+        const response = await fetch(GEO_API_URL);
+        const data = await response.json();
+        if (data.length > 0) {
+            const { lat, lon } = data[0];
+            fetchWeatherData(lat, lon);
+        } else {
+            alert("City not found. Please enter a valid city name.");
+        }
+    } catch (error) {
+        alert("Error fetching coordinates for the city!");
+        console.error(error);
+    }
 };
 
 searchButton.addEventListener("click", () => {
