@@ -1,6 +1,4 @@
-# "Simple Weather Application using HTML, CSS &amp; JavaScript"
+ Weather Application using HTML, CSS & JavaScript"
 
-## Overview of Weather App
-
-It's a  Simple Weather Application made by using HTML, CSS &amp; JavaScript.
+I am Himadri Mandal. B.Tech cse student. I make the project to check live weather. Hear I have use Html CSS and JavaScript.
 
